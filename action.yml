@@ -1,0 +1,43 @@
+name: Setup Sleet
+author: David G. Moore, Jr., <david@dgmjr.io>
+description: Sets up the Sleet utility for managing NuGet packages.
+
+branding:
+  icon: cloud-snow
+  color: white
+
+inputs:
+  source:
+    required: true
+    description: The Sleet source URL
+  name:
+    required: false
+    description: The Sleet API key
+    default: Sleet
+  connectionstring:
+    required: false
+    description: The Sleet connection string
+  container:
+    required: false
+    description: The Sleet container name
+    default: sleet
+  
+runs:
+  using: compositetuh
+  steps:
+    - id: Ensure-sleet-is-installed
+      shell: bash
+      env: 
+        SLEET_FEED_TYPE: azure
+        SLEET_FEED_CONTAINER: ${{ inputs.container }}
+        SLEET_FEED_CONNECTION_STRING: ${{ inputs.connectionstring }}
+      run: |
+        sleetExists=$(dotnet tool list --global | grep sleet)
+        if [ -z "$sleetExists" ]; then
+          echo "sleet tool already exists: $sleetExists; checking for updates..."
+          dotnet tool update --global sleet
+        else
+          echo "sleet tool not found; installing..."
+          dotnet tool install --global sleet
+        fi
+        echo "Sleet tool installed."s
